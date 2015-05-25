@@ -3,7 +3,7 @@
 <div class="row">
     <div class="col-xs-12">
         <div class="page-header">
-            <a href="{% url 'create' host_id %}" class="btn btn-sm btn-success pull-right">{% trans "New Instance" %}</a>
+            <!-- <a href="{% url 'create' host_id %}" class="btn btn-sm btn-success pull-right">{% trans "New Instance" %}</a> -->
             <h1><a href="{% url 'overview' host_id %}">{{ compute.name }}</a></h1>
         </div>
     </div>
@@ -27,10 +27,10 @@
                 <a href="{% url 'interfaces' host_id %}"
                    class="list {% active request "^/interface" %}">{% trans "Interfaces" %}</a>
             </li>
-            <li>
+            <!-- <li>
                 <a href="{% url 'secrets' host_id %}"
                    class="list {% active request "^/secrets" %}">{% trans "Secrets" %}</a>
-            </li>
+            </li> -->
             <li>
                 <a href="{% url 'overview' host_id %}" class="list {% active request "^/host" %}">{% trans "Overview" %}</a>
             </li>

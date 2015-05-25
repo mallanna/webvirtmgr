@@ -20,7 +20,10 @@ def index(request):
     if not request.user.is_authenticated():
         return HttpResponseRedirect(reverse('login'))
     else:
+        """
         return HttpResponseRedirect(reverse('servers_list'))
+        """
+        return HttpResponseRedirect(reverse('infrastructure'))
 
 
 def servers_list(request):
@@ -116,8 +119,8 @@ def servers_list(request):
                                           password='')
                 new_socket_host.save()
                 return HttpResponseRedirect(request.get_full_path())
-
     return render_to_response('servers.html', locals(), context_instance=RequestContext(request))
+
 
 
 def infrastructure(request):

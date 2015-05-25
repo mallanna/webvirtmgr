@@ -38,14 +38,14 @@
                         {% endfor %} ]
                     </td>
                 </tr>
-                <tr>
+                <!-- <tr>
                     <td>{% trans "Pool type" %}</td>
                     <td>{% if not type %}{% trans "None" %}{% else %}{{ type }}{% endif %}</td>
                 </tr>
                 <tr>
                     <td>{% trans "Pool path" %}</td>
                     <td>{% if not path %}{% trans "None" %}{% else %}{{ path }}{% endif %}</td>
-                </tr>
+                </tr> -->
                 <tr>
                     <td>{% trans "Pool status" %}</td>
                     <td>{% if not status %}{% trans "None" %}{% else %}{{ status }}{% endif %}</td>
@@ -54,7 +54,7 @@
                     <td>{% trans "Size" %} ({{ size|filesizeformat }} / {{ used|filesizeformat }})</td>
                     <td>{% trans "Usage" %}: {{ percent }}%</td>
                 </tr>
-                <tr>
+               <!-- <tr>
                     <td>{% trans "State" %}</td>
                     <td>
                         <form action="" method="post" role="form">{% csrf_token %}
@@ -82,7 +82,7 @@
                             {% endifequal %}
                         </form>
                     </td>
-                </tr>
+                </tr> -->
             </tbody>
         </table>
         {% if state %}
