@@ -10,29 +10,59 @@
 </div>
 <div class="row">
     <div class="sidebar col-xs-12 col-sm-3">
-        <ul>
-            <li>
-                <a href="{% url 'instances' host_id %}"
-                   class="list {% active request "^/instance" %}">{% trans "Instances" %}</a>
-            </li>
-            <li>
-                <a href="{% url 'storages' host_id %}"
-                   class="list {% active request "^/storage" %}">{% trans "Storages" %}</a>
-            </li>
-            <li>
-                <a href="{% url 'networks' host_id %}"
-                   class="list {% active request "^/network" %}">{% trans "Networks" %}</a>
-            </li>
-            <li>
-                <a href="{% url 'interfaces' host_id %}"
-                   class="list {% active request "^/interface" %}">{% trans "Interfaces" %}</a>
-            </li>
-            <!-- <li>
-                <a href="{% url 'secrets' host_id %}"
-                   class="list {% active request "^/secrets" %}">{% trans "Secrets" %}</a>
-            </li> -->
-            <li>
-                <a href="{% url 'overview' host_id %}" class="list {% active request "^/host" %}">{% trans "Overview" %}</a>
-            </li>
-        </ul>
+        <div class="panel-group" id="accordion">
+            <div class="panel">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" data-parent="#accordion" href="#hostcollapse" >
+                            <b> Host  </b>
+                        </a>
+                    </h4>
+                </div>
+                <div id="hostcollapse" class="panel-collapse collapse in">
+                    <div>
+                        <ul>
+                            <li>
+                                <a href="{% url 'overview' host_id %}"
+                                   class="list {% active request "^/host" %}">{% trans "Overview" %}
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'interfaces' host_id %}"
+                                   class="list {% active request "^/interface" %}">{% trans "Interfaces" %}
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" data-parent="#accordion" href="#computecollapse" >
+                            <b>  VMs </b>
+                        </a>
+                    </h4>
+                </div>
+                <div id="computecollapse" class="panel-collapse collapse in">
+                    <div>
+                        <ul>
+                            <li>
+                                <a href="{% url 'instances' host_id %}"
+                                   class="list {% active request "^/instance" %}">{% trans "Instances" %}</a>
+                            </li>
+                            <li>
+                                <a href="{% url 'storages' host_id %}"
+                                   class="list {% active request "^/storage" %}">{% trans "Storages" %}</a>
+                            </li>
+                            <li>
+                                <a href="{% url 'networks' host_id %}"
+                                   class="list {% active request "^/network" %}">{% trans "Networks" %}</a>
+                            </li>
+
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
+

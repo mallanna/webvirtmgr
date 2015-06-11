@@ -48,16 +48,20 @@
                 <tr>
                     <td>{% trans "State" %}</td>
                     <td>
+
                         <form action="" method="post" role="form">{% csrf_token %}
                             {% ifequal state 0 %}
                                 <input type="submit" class="btn btn-xs btn-default" name="start" value="{% trans "Start" %}">
+                                {% if superuser %}
                                 <input type="submit" class="btn btn-xs btn-default" name="delete" value="{% trans "Delete" %}"
                                        onclick="return confirm('{% trans "Are you sure?" %}')">
+                                {% endif %}
                             {% else %}
                                 <input type="submit" class="btn btn-xs btn-default" name="stop" value="{% trans "Stop" %}"
                                        onclick="return confirm('{% trans "Are you sure?" %}')">
                             {% endifequal %}
                         </form>
+
                     </td>
                 </tr>
             </tbody>

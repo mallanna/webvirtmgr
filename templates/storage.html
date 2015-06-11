@@ -26,44 +26,50 @@
         {% endif %}
         <table class="table table-hover table-nolines" role="main">
             <tbody>
+            <tr>
+                <td>{% trans "Pool name" %}</td>
+                <td>
+                    [{% for storage in storages %}
+                    {% ifequal storage pool %}
+                        <b>{{ pool }}</b>
+                    {% else %}
+                        <a href="{% url 'storage' host_id storage %}">{{ storage }}</a>
+                    {% endifequal %}
+                {% endfor %} ]
+                </td>
+            </tr>
+            {% if superuser %}
                 <tr>
-                    <td>{% trans "Pool name" %}</td>
-                    <td>
-                        [{% for storage in storages %}
-                            {% ifequal storage pool %}
-                                <b>{{ pool }}</b>
-                            {% else %}
-                                <a href="{% url 'storage' host_id storage %}">{{ storage }}</a>
-                            {% endifequal %}
-                        {% endfor %} ]
-                    </td>
-                </tr>
-                <!-- <tr>
                     <td>{% trans "Pool type" %}</td>
                     <td>{% if not type %}{% trans "None" %}{% else %}{{ type }}{% endif %}</td>
                 </tr>
                 <tr>
                     <td>{% trans "Pool path" %}</td>
                     <td>{% if not path %}{% trans "None" %}{% else %}{{ path }}{% endif %}</td>
-                </tr> -->
-                <tr>
-                    <td>{% trans "Pool status" %}</td>
-                    <td>{% if not status %}{% trans "None" %}{% else %}{{ status }}{% endif %}</td>
                 </tr>
+            {% endif %}
+            <tr>
+                <td>{% trans "Pool status" %}</td>
+                <td>{% if not status %}{% trans "None" %}{% else %}{{ status }}{% endif %}</td>
+            </tr>
+            <tr>
+                <td>{% trans "Size" %} ({{ size|filesizeformat }} / {{ used|filesizeformat }})</td>
+                <td>{% trans "Usage" %}: {{ percent }}%</td>
+            </tr>
+            {% if superuser %}
                 <tr>
-                    <td>{% trans "Size" %} ({{ size|filesizeformat }} / {{ used|filesizeformat }})</td>
-                    <td>{% trans "Usage" %}: {{ percent }}%</td>
-                </tr>
-               <!-- <tr>
                     <td>{% trans "State" %}</td>
                     <td>
                         <form action="" method="post" role="form">{% csrf_token %}
                             {% ifequal state 0 %}
-                                <input type="submit" class="btn btn-xs btn-default" name="start" value="{% trans "Start" %}">
-                                <input type="submit" class="btn btn-xs btn-default" name="delete" value="{% trans "Delete" %}"
+                                <input type="submit" class="btn btn-xs btn-default" name="start"
+                                       value="{% trans "Start" %}">
+                                <input type="submit" class="btn btn-xs btn-default" name="delete"
+                                       value="{% trans "Delete" %}"
                                        onclick="return confirm('{% trans "Are you sure?" %}')">
                             {% else %}
-                                <input type="submit" class="btn btn-xs btn-default" name="stop" value="{% trans "Stop" %}"
+                                <input type="submit" class="btn btn-xs btn-default" name="stop"
+                                       value="{% trans "Stop" %}"
                                        onclick="return confirm('{% trans "Are you sure?" %}')">
                             {% endifequal %}
                         </form>
@@ -78,15 +84,17 @@
                                        value="{% trans "Enable" %}">
                             {% else %}
                                 <input type="submit" class="btn btn-xs btn-default" name="unset_autostart"
-                                       onclick="return confirm('{% trans "Are you sure?" %}')" value="{% trans "Disable" %}">
+                                       onclick="return confirm('{% trans "Are you sure?" %}')"
+                                       value="{% trans "Disable" %}">
                             {% endifequal %}
                         </form>
                     </td>
-                </tr> -->
+                </tr>
+            {% endif %}
             </tbody>
         </table>
         {% if state %}
-            {% ifequal pool "iso" %}
+            {% if pool == "iso" and superuser %}
                 <h3>{% trans "Images" %}</h3>
                 <hr>
                 {% ifnotequal state 0 %}
@@ -98,31 +106,31 @@
                     <div class="table-responsive">
                         <table class="table table-striped table-bordered" id="sortTable">
                             <thead>
-                                <tr>
-                                    <th style="width:35px;">#</th>
-                                    <th>{% trans "Name" %}</th>
-                                    <th style="width:90px;">{% trans "Size" %}</th>
-                                    <th style="width:75px;">{% trans "Format" %}</th>
-                                    <th colspan="2">{% trans "Action" %}</th>
-                                </tr>
+                            <tr>
+                                <th style="width:35px;">#</th>
+                                <th>{% trans "Name" %}</th>
+                                <th style="width:90px;">{% trans "Size" %}</th>
+                                <th style="width:75px;">{% trans "Format" %}</th>
+                                <th colspan="2">{% trans "Action" %}</th>
+                            </tr>
                             </thead>
                             <tbody>
-                                {% for volume in volumes %}
-                                    <tr>
-                                        <td>{{ forloop.counter }}</td>
-                                        <td>{{ volume.name }}</td>
-                                        <td style="width:65px;">{{ volume.size|filesizeformat }}</td>
-                                        <td>{{ volume.type }}</td>
-                                        <td style="width:30px;">
-                                            <form action="" method="post" role="form">{% csrf_token %}
-                                                <input type="hidden" name="volname" value="{{ volume.name }}">
-                                                <input type="submit" class="btn btn-sm btn-danger" name="del_volume"
-                                                       value="{% trans "Delete" %}"
-                                                       onclick="return confirm('{% trans "Are you sure?" %}')">
-                                            </form>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
+                            {% for volume in volumes %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ volume.name }}</td>
+                                    <td style="width:65px;">{{ volume.size|filesizeformat }}</td>
+                                    <td>{{ volume.type }}</td>
+                                    <td style="width:30px;">
+                                        <form action="" method="post" role="form">{% csrf_token %}
+                                            <input type="hidden" name="volname" value="{{ volume.name }}">
+                                            <input type="submit" class="btn btn-sm btn-danger" name="del_volume"
+                                                   value="{% trans "Delete" %}"
+                                                   onclick="return confirm('{% trans "Are you sure?" %}')">
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
                             </tbody>
                         </table>
                     </div>
@@ -135,7 +143,8 @@
                 <h3>{% trans "Volumes" %}</h3>
                 <hr>
                 {% ifnotequal state 0 %}
-                    <a href="#AddImage" class="btn btn-success" data-toggle="modal">{% trans "Add Image" %}</a><br><br>
+                    <a href="#AddImage" class="btn btn-success" data-toggle="modal">{% trans "Create Volume" %}</a>
+                    <a href="#AddImage" class="btn btn-success" data-toggle="modal">{% trans "Upload Volume" %}</a><br><br>
                 {% endifnotequal %}
 
                 {% if volumes %}
@@ -158,7 +167,8 @@
                                     <td>{{ volume.size|filesizeformat }}</td>
                                     <td>{{ volume.type }}</td>
                                     <td style="width:30px;">
-                                        <div class="modal fade" id="Clone{{ forloop.counter }}" tabindex="-1" role="dialog"
+                                        <div class="modal fade" id="Clone{{ forloop.counter }}" tabindex="-1"
+                                             role="dialog"
                                              aria-labelledby="addHostLabel" aria-hidden="true">
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
@@ -168,7 +178,8 @@
                                                         <h4 class="modal-title">{% trans "Clone image" %} <span
                                                                 class="label label-danger">{{ volume.name }}</span></h4>
                                                     </div>
-                                                    <form class="form-horizontal" method="post" role="form">{% csrf_token %}
+                                                    <form class="form-horizontal" method="post"
+                                                          role="form">{% csrf_token %}
                                                         <div class="form-group">
                                                             <label class="col-sm-3 control-label">{% trans "Name" %}</label>
 
@@ -176,7 +187,8 @@
                                                                 <input type="text" class="form-control" name="name"
                                                                        placeholder="{% trans "Name" %}" required
                                                                        pattern="[a-zA-Z0-9\.\-_]+">
-                                                                <input type="hidden" name="image" value="{{ volume.name }}">
+                                                                <input type="hidden" name="image"
+                                                                       value="{{ volume.name }}">
                                                             </div>
                                                             <label class="col-sm-1 control-label">.img</label>
                                                         </div>
@@ -184,7 +196,8 @@
                                                             <label class="col-sm-3 control-label">{% trans "Convert" %}</label>
 
                                                             <div class="col-sm-6">
-                                                                <input class="volume-convert" type="checkbox" name="convert"
+                                                                <input class="volume-convert" type="checkbox"
+                                                                       name="convert"
                                                                        value="true">
                                                             </div>
                                                         </div>
@@ -245,7 +258,7 @@
                         <h4>{% trans "You do not have any volumes or storage pools active" %}</h4>
                     </div>
                 {% endif %}
-            {% endifequal %}
+            {% endif %}
         {% endif %}
     </div>
 
@@ -360,10 +373,10 @@
     </script>
     <script src="{% static "js/jquery.tablesorter.js" %}"></script>
     <script>
-        $(function() {
+        $(function () {
             $("#sortTable").tablesorter({
                 ignoreCase: true,
-                sortList: [[0,0]],
+                sortList: [[0, 0]],
                 headers: {4: {sorter: false}},
                 textSorter: {1: $.tablesorter.sortText}
             });

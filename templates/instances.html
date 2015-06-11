@@ -8,7 +8,7 @@
 {% block content %}
     {% include 'sidebar.html' %}
     <div class="main col-xs-12 col-sm-9" role="main">
-        {% if instances|length  < 1 %}
+        {% if instances|length  < maxvms or superuser %}
             <div class="row">
                 <div class="col-xs-12">
                     <a href="{% url 'create' host_id %}"

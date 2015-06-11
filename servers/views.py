@@ -9,6 +9,7 @@ from servers.forms import ComputeAddTcpForm, ComputeAddSshForm, ComputeEditHostF
 from vrtManager.hostdetails import wvmHostDetails
 from vrtManager.connection import CONN_SSH, CONN_TCP, CONN_TLS, CONN_SOCKET, connection_manager
 from libvirt import libvirtError
+from nib.util import is_nib_super_user
 
 
 def index(request):
@@ -20,10 +21,10 @@ def index(request):
     if not request.user.is_authenticated():
         return HttpResponseRedirect(reverse('login'))
     else:
-        """
-        return HttpResponseRedirect(reverse('servers_list'))
-        """
-        return HttpResponseRedirect(reverse('infrastructure'))
+        if is_nib_super_user(request.user.username):
+            return HttpResponseRedirect(reverse('servers_list'))
+        else:
+            return HttpResponseRedirect(reverse('infrastructure'))
 
 
 def servers_list(request):
@@ -32,6 +33,8 @@ def servers_list(request):
     """
     if not request.user.is_authenticated():
         return HttpResponseRedirect(reverse('login'))
+
+    superuser = is_nib_super_user(request.user.username)
 
     def get_hosts_status(hosts):
         """
@@ -129,6 +132,8 @@ def infrastructure(request):
     """
     if not request.user.is_authenticated():
         return HttpResponseRedirect(reverse('login'))
+
+    superuser = is_nib_super_user(request.user.username)
 
     compute = Compute.objects.filter()
     hosts_vms = {}

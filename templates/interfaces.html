@@ -13,205 +13,225 @@
                 </div>
             {% endfor %}
         {% endif %}
-        <!--<div class="btn-group-sm">
-            <a href="#AddInterface" class="btn btn-success" data-toggle="modal">{% trans "New Interface" %}</a>
-        </div> -->
         {% if ifaces_all %}
             <div class="row" role="main">
-            {% for iface in ifaces_all %}
                 <div class="col-xs-12 col-sm-4">
-                    <div class="panel {% ifequal iface.state 1 %}panel-success{% else %}panel-danger{% endifequal %} panel-data">
-                        <div class="panel-heading">
-                            <h3 class="panel-title"><a href="{% url 'interface' host_id iface.name %}">{{ iface.name }}</a>
-                            </h3>
-                        </div>
-                        <div class="panel-body">
-                            <p>{% trans "Type" %}: {{ iface.type }}</p>
+                    <canvas id="myCanvas" width="500" height="300" style="margin: 0px; padding: 0px;">
+                        Your browser does not support the HTML5 canvas tag.
+                    </canvas>
 
-                            <p>{% trans "MAC" %}: {{ iface.mac }}</p>
-                        </div>
-                    </div>
+                    <script>
+                        function onLoad() {
+                            var c = document.getElementById("myCanvas");
+                            var ctx = c.getContext("2d");
+                            ctx.beginPath();
+                            var links = []; // Links information
+                            var hoverLink = ""; // Href of the link which cursor points at
+
+                            function portTextLinks(x, y, href, title, state) {
+                                ctx.font = '12pt Calibri';
+                                ctx.textAlign = 'center';
+                                ctx.textBaseline = 'middle';
+                                if (state == 1) {
+                                    ctx.fillStyle = 'green';
+                                    var linkTitle = title,
+                                            linkX = x,
+                                            linkY = y,
+                                            linkWidth = ctx.measureText(linkTitle).width,
+                                            linkHeight = parseInt(ctx.font); // Get lineheight out of fontsize
+
+                                    // Draw the link
+                                    ctx.fillText(linkTitle, linkX, linkY);
+
+                                    // Add mouse listeners
+                                    c.addEventListener("mousemove", on_mousemove, false);
+                                    c.addEventListener("click", on_click, false);
+
+                                    // Add link params to array
+                                    links.push(x + ";" + y + ";" + linkWidth + ";" + linkHeight + ";" + href);
+                                } else if (state == 0) {
+                                    ctx.fillStyle = 'red';
+                                    ctx.fillText(title, x, y);
+
+                                } else {
+                                    ctx.fillStyle = 'black';
+                                    ctx.fillText(title, x, y);
+                                }
+                            }
+
+                            function on_mousemove(ev) {
+                                var x, y;
+
+                                // Get the mouse position relative to the canvas element
+                                if (ev.layerX || ev.layerX == 0) { // For Firefox
+                                    x = ev.layerX;
+                                    y = ev.layerY;
+                                }
+
+                                // Link hover
+                                for (var i = links.length - 1; i >= 0; i--) {
+                                    var params = [];
+
+                                    // Get link params back from array
+                                    params = links[i].split(";");
+
+                                    var linkX = parseInt(params[0]),
+                                            linkY = parseInt(params[1]),
+                                            linkWidth = parseInt(params[2]),
+                                            linkHeight = parseInt(params[3]),
+                                            linkHref = params[4];
+
+                                    // Check if cursor is in the link area
+                                    if (x >= linkX && x <= (linkX + linkWidth) && y >= linkY && y <= (linkY + linkHeight)) {
+                                        document.body.style.cursor = "pointer";
+                                        hoverLink = linkHref;
+                                        break;
+                                    }
+                                    else {
+                                        document.body.style.cursor = "";
+                                        hoverLink = "";
+                                    }
+                                }
+                                ;
+                            }
+
+                            // Link click
+                            function on_click(e) {
+                                if (hoverLink) {
+                                    window.location = hoverLink; // Use this to open in current window
+                                }
+                            }
+
+                            function fbsaBox(x, y, w, h) {
+                                ctx.rect(x, y, w, h);
+                                ctx.lineWidth = 2;
+                                ctx.strokeStyle = 'blue';
+                                ctx.stroke();
+                            }
+
+                            function portBox(x, y, w, h, state) {
+                                ctx.beginPath();
+                                ctx.rect(x, y, w, h);
+                                ctx.lineWidth = 2;
+                                if (state == 0) {
+                                    ctx.fillStyle = 'red';
+                                    ctx.fill();
+                                    ctx.strokeStyle = 'red';
+                                } else if (state == 1) {
+                                    ctx.strokeStyle = 'green';
+                                } else {
+                                    ctx.fillStyle = 'black';
+                                    ctx.fill();
+                                    ctx.strokeStyle = 'black';
+                                }
+
+                                ctx.stroke();
+                            }
+
+                            function enbBox(x, y, w, h) {
+                                ctx.beginPath();
+                                ctx.rect(x, y, w, h);
+                                ctx.lineWidth = 2;
+                                ctx.strokeStyle = 'blue';
+                                ctx.font = '12pt Calibri';
+                                ctx.textAlign = 'center';
+                                ctx.textBaseline = 'middle';
+                                ctx.fillStyle = 'black';
+                                ctx.fillText('eNB', x + 25, y + 25);
+                                ctx.stroke();
+                            }
+
+                            function switchBox(x, y, w, h) {
+                                ctx.beginPath();
+                                ctx.rect(x, y, w, h);
+                                ctx.lineWidth = 2;
+                                ctx.strokeStyle = 'blue';
+                                ctx.font = '12pt Calibri';
+                                ctx.textAlign = 'center';
+                                ctx.textBaseline = 'middle';
+                                ctx.fillStyle = 'black';
+                                ctx.fillText('switch', x + 30, y + 18);
+                                ctx.stroke();
+                            }
+
+                            function drawInterfaceLine(f_x, f_y, e_x, e_y, e_w, e_h) {
+                                ctx.beginPath();
+                                ctx.moveTo(f_x + 5, f_y + 50);
+                                ctx.lineTo(f_x + 5, e_y + e_h / 2);
+                                ctx.lineTo(e_x + e_w, e_y + e_h / 2);
+                                ctx.lineWidth = 2;
+                                ctx.strokeStyle = 'green';
+                                ctx.stroke();
+
+                            }
+
+                            function drawSwitchIfaceLines(s_x, s_y, s_w, s_h) {
+                                ctx.beginPath();
+                                ctx.lineWidth = 2;
+                                ctx.strokeStyle = 'black';
+                                ctx.moveTo(s_x + s_w, s_y + s_h / 5);
+                                ctx.lineTo(s_y + s_w + 150, s_y + s_h / 5);
+                                ctx.moveTo(s_x + s_w, s_y + s_h / 5 * 4);
+                                ctx.lineTo(s_y + s_w + 150, s_y + s_h / 5 * 4);
+                                ctx.font = '10pt Calibri';
+                                ctx.fillStyle = 'black';
+                                ctx.fillText('LMP', s_x + s_w + 30, s_y);
+                                ctx.fillText('SGI', s_x + s_w + 30, s_y + s_h);
+                                ctx.stroke();
+                            }
+
+                            var fb_x = c.width / 4;
+                            var fb_y = 50;
+                            var fb_w = 300;
+                            var fb_h = 60;
+                            var p1_x = fb_x + fb_w / 5;
+                            var p2_x = p1_x + fb_w / 5;
+                            var p3_x = p2_x + fb_w / 5;
+                            var p4_x = p3_x + fb_w / 5;
+                            var p_y = fb_y + 45;
+                            var p_w = 10;
+                            var p_h = 10;
+
+                            fbsaBox(fb_x, fb_y, fb_w, fb_h);
+                            enbBox(c.width / 7, p_y + 100, 60, 50);
+                            switchBox(c.width / 7 * 4, p_y + 110, 60, 40);
+                            drawSwitchIfaceLines(c.width / 7 * 4, p_y + 110, 60, 40);
+
+                            {% for iface in ifaces_all %}
+                                {% if iface.name == 'br0'%}
+                                    {% ifequal iface.state 1 %}
+                                        portBox(p1_x, p_y, p_w, p_h, 1);
+                                        portTextLinks(p1_x + 3, p_y - 15, "{% url 'interface' host_id iface.name %}", "EIF1", 1);
+                                        drawInterfaceLine(p1_x, fb_y, c.width / 7, p_y + 100, 60, 50);
+                                    {% else %}
+                                        portBox(p1_x, p_y, p_w, p_h, 0);
+                                        portTextLinks(p1_x + 3, p_y - 15, "{% url 'interface' host_id iface.name %}", "EIF1", 0)
+                                    {% endifequal %}
+                                {% endif %}
+                                {% if iface.name == 'br1'%}
+                                    {% ifequal iface.state 1 %}
+                                        var p2_x = p1_x + fb_w / 5;
+                                        portBox(p2_x, p_y, p_w, p_h, 1);
+                                        portTextLinks(p2_x + 3, p_y - 15, "{% url 'interface' host_id iface.name %}", "EIF2", 1);
+                                        portTextLinks(p2_x + 3, p_y - 35, "{% url 'interface' host_id iface.name %}", "LMP", 1);
+                                        drawInterfaceLine(p2_x, fb_y, c.width / 7 * 4, p_y + 110, 0, 40);
+                                    {% else %}
+                                        portBox(p2_x, p_y, p_w, p_h, 0);
+                                        portTextLinks(p2_x + 3, p_y - 15, "{% url 'interface' host_id iface.name %}", "EIF2", 0);
+                                    {% endifequal %}
+                                {% endif %}
+                            {% endfor %}
+
+                            portBox(p3_x, p_y, p_w, p_h, 2);
+                            portBox(p4_x, p_y, p_w, p_h, 2);
+                            portTextLinks(p3_x + 3, p_y - 15, "", "EIF3", 2);
+                            portTextLinks(p4_x + 3, p_y - 15, "", "EIF4", 2);
+                        }
+                        onLoad();
+                    </script>
                 </div>
-            {% endfor %}
             </div>
         {% endif %}
     </div>
-
-    <!-- Modal Secret -->
-    <div class="modal fade" id="AddInterface" tabindex="-1" role="dialog" aria-labelledby="AddInterface"
-         aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h4 class="modal-title">{% trans "Create New Interface" %}</h4>
-                </div>
-                <div class="tab-content">
-                    <form class="form-horizontal" method="post" action="" role="form">{% csrf_token %}
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label">{% trans "Name" %}</label>
-
-                            <div class="col-sm-6">
-                                <input type="text" name="name" class="form-control" placeholder="br0" maxlength="10"
-                                       required pattern="[a-z0-9\. ]+"/>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label">{% trans "Start mode" %}</label>
-
-                            <div class="col-sm-6">
-                                <select name="start_mode" class="form-control">
-                                    <option value="none">{% trans "none" %}</option>
-                                    <option value="onboot">{% trans "onboot" %}</option>
-                                    <option value="hotplug">{% trans "hotplug" %}</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label">{% trans "Device" %}</label>
-
-                            <div class="col-sm-6">
-                                <select name="netdev" class="form-control">
-                                    {% for dev in netdevs %}
-                                        <option value="{{ dev }}">{{ dev }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label">{% trans "Type" %}</label>
-
-                            <div class="col-sm-6">
-                                <select name="itype" class="form-control" id="itype">
-                                    <option value="bridge">{% trans "bridge" %}</option>
-                                    <option value="ethernet">{% trans "ethernet" %}</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group bridge_name_form_group">
-                            <label class="col-sm-3 control-label">{% trans "STP" %}</label>
-
-                            <div class="col-sm-6">
-                                <select name="stp" class="form-control">
-                                    <option value="on">{% trans "on" %}</option>
-                                    <option value="off">{% trans "off" %}</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group bridge_name_form_group">
-                            <label class="col-sm-3 control-label">{% trans "Delay" %}</label>
-
-                            <div class="col-sm-6">
-                                <input type="text" name="delay" class="form-control" value="0" maxlength="3" required
-                                       pattern="[0-9]+"/>
-                            </div>
-                        </div>
-                        <div class="tabbable">
-                            <ul class="nav nav-tabs">
-                                <li class="active">
-                                    <a href="#1" data-toggle="tab">{% trans "IPv4" %}</a>
-                                </li>
-                                <li><a href="#2" data-toggle="tab">{% trans "IPv6" %}</a></li>
-                            </ul>
-                        </div>
-                        <div class="tab-content">
-                            <div class="tab-pane active" id="1">
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label">{% trans "IPv4 Mode" %}</label>
-
-                                    <div class="col-sm-6">
-                                        <select name="ipv4_type" class="form-control" id="ipv4">
-                                            <option value="dhcp">{% trans "DHCP" %}</option>
-                                            <option value="static">{% trans "Static" %}</option>
-                                            <option value="none">{% trans "No configuration" %}</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="form-group static_ipv4_form_group">
-                                    <label class="col-sm-3 control-label">{% trans "IPv4 Address" %}</label>
-
-                                    <div class="col-sm-6">
-                                        <input type="text" class="form-control" name="ipv4_addr" maxlength="19"
-                                               pattern="[0-9\.\/]+">
-                                    </div>
-                                </div>
-                                <div class="form-group static_ipv4_form_group">
-                                    <label class="col-sm-3 control-label">{% trans "IPv4 Gateway" %}</label>
-
-                                    <div class="col-sm-6">
-                                        <input type="text" class="form-control" name="ipv4_gw" maxlength="16"
-                                               pattern="[0-9\.]+">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="tab-pane" id="2">
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label">{% trans "IPv6 Mode" %}</label>
-
-                                    <div class="col-sm-6">
-                                        <select name="ipv6_type" class="form-control" id="ipv6">
-                                            <option value="none">{% trans "No configuration" %}</option>
-                                            <option value="dhcp">{% trans "DHCP" %}</option>
-                                            <option value="static">{% trans "Static" %}</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="form-group static_ipv6_form_group">
-                                    <label class="col-sm-3 control-label">{% trans "IPv6 Address" %}</label>
-
-                                    <div class="col-sm-6">
-                                        <input type="text" class="form-control" name="ipv6_addr" maxlength="100"
-                                               pattern="[0-9a-f\:\/]+">
-                                    </div>
-                                </div>
-                                <div class="form-group static_ipv6_form_group">
-                                    <label class="col-sm-3 control-label">{% trans "IPv6 Gateway" %}</label>
-
-                                    <div class="col-sm-6">
-                                        <input type="text" class="form-control" name="ipv6_gw" maxlength="100"
-                                               pattern="[0-9a-f\:]+">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-default"
-                                    data-dismiss="modal">{% trans "Close" %}</button>
-                            <button type="submit" class="btn btn-primary" name="create">{% trans "Create" %}</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-            <!-- /.modal-content -->
-        </div>
-        <!-- /.modal-dialog -->
-    </div><!-- /.modal -->
     {% include 'sidebar_close.html' %}
-{% endblock %}
-{% block script %}
-    <script>
-        $(document).ready(function () {
-            $('#itype').change(function (eventObject) {
-                if ($(this).val() == 'bridge') {
-                    $('.bridge_name_form_group').show();
-                } else {
-                    $('.bridge_name_form_group').hide();
-                }
-            }).change();
-            $('#ipv4').change(function (eventObject) {
-                if ($(this).val() == 'static') {
-                    $('.static_ipv4_form_group').show();
-                } else {
-                    $('.static_ipv4_form_group').hide();
-                }
-            }).change();
-            $('#ipv6').change(function (eventObject) {
-                if ($(this).val() == 'static') {
-                    $('.static_ipv6_form_group').show();
-                } else {
-                    $('.static_ipv6_form_group').hide();
-                }
-            }).change();
-        });
-    </script>
 {% endblock %}

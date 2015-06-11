@@ -10,6 +10,8 @@ from vrtManager.interface import wvmInterface, wvmInterfaces
 
 from libvirt import libvirtError
 
+from nib.util import is_nib_super_user
+
 
 def interfaces(request, host_id):
     """
@@ -18,6 +20,8 @@ def interfaces(request, host_id):
     """
     if not request.user.is_authenticated():
         return HttpResponseRedirect(reverse('index'))
+
+    superuser = is_nib_super_user(request.user.username)
 
     errors = []
     ifaces_all = []
@@ -61,6 +65,8 @@ def interface(request, host_id, iface):
     """
     if not request.user.is_authenticated():
         return HttpResponseRedirect(reverse('index'))
+
+    superuser = is_nib_super_user(request.user.username)
 
     errors = []
     ifaces_all = []

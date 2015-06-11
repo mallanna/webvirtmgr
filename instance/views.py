@@ -17,6 +17,7 @@ from vrtManager.instance import wvmInstances, wvmInstance
 
 from libvirt import libvirtError, VIR_DOMAIN_XML_SECURE
 from webvirtmgr.settings import TIME_JS_REFRESH, QEMU_KEYMAPS, QEMU_CONSOLE_TYPES
+from nib.util import is_nib_super_user, nib_get_maxvms
 
 
 def instusage(request, host_id, vname):
@@ -303,6 +304,9 @@ def instances(request, host_id):
     if not request.user.is_authenticated():
         return HttpResponseRedirect(reverse('login'))
 
+    superuser = is_nib_super_user(request.user.username)
+    maxvms = nib_get_maxvms()
+
     errors = []
     instances = []
     time_refresh = 8000
@@ -373,6 +377,8 @@ def instance(request, host_id, vname):
     """
     if not request.user.is_authenticated():
         return HttpResponseRedirect(reverse('login'))
+
+    superuser = is_nib_super_user(request.user.username)
 
     def show_clone_disk(disks):
         clone_disk = []
