@@ -213,6 +213,7 @@ INSTALLED_APPS = (
     'instance',
     'create',
     'gunicorn',
+    'nib',
 )
 
 NIB_SUPER_USER = 'mallanna'

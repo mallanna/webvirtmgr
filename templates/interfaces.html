@@ -32,8 +32,9 @@
                                 ctx.font = '12pt Calibri';
                                 ctx.textAlign = 'center';
                                 ctx.textBaseline = 'middle';
-                                if (state == 1) {
-                                    ctx.fillStyle = 'green';
+                                var fillStyle = ['red', 'green', 'black'];
+                                if (state <= 1) {
+                                    ctx.fillStyle = fillStyle[state];
                                     var linkTitle = title,
                                             linkX = x,
                                             linkY = y,
@@ -49,10 +50,6 @@
 
                                     // Add link params to array
                                     links.push(x + ";" + y + ";" + linkWidth + ";" + linkHeight + ";" + href);
-                                } else if (state == 0) {
-                                    ctx.fillStyle = 'red';
-                                    ctx.fillText(title, x, y);
-
                                 } else {
                                     ctx.fillStyle = 'black';
                                     ctx.fillText(title, x, y);
@@ -207,6 +204,9 @@
                                         portBox(p1_x, p_y, p_w, p_h, 0);
                                         portTextLinks(p1_x + 3, p_y - 15, "{% url 'interface' host_id iface.name %}", "EIF1", 0)
                                     {% endifequal %}
+                                {% else %}
+                                    portBox(p1_x, p_y, p_w, p_h, 2);
+                                    portTextLinks(p1_x + 3, p_y - 15, "", "EIF1", 2)
                                 {% endif %}
                                 {% if iface.name == 'br1'%}
                                     {% ifequal iface.state 1 %}
@@ -219,6 +219,9 @@
                                         portBox(p2_x, p_y, p_w, p_h, 0);
                                         portTextLinks(p2_x + 3, p_y - 15, "{% url 'interface' host_id iface.name %}", "EIF2", 0);
                                     {% endifequal %}
+                                {% else %}
+                                    portBox(p2_x, p_y, p_w, p_h, 2);
+                                    portTextLinks(p2_x + 3, p_y - 15, "", "EIF2", 2);
                                 {% endif %}
                             {% endfor %}
 

@@ -13,6 +13,7 @@ from libvirt import libvirtError
 from vrtManager.create import wvmCreate
 from vrtManager import util
 from create.forms import FlavorAddForm, NewVMForm
+from nib.util import is_nib_super_user
 
 
 def create(request, host_id):
@@ -21,6 +22,8 @@ def create(request, host_id):
     """
     if not request.user.is_authenticated():
         return HttpResponseRedirect(reverse('login'))
+
+    superuser = is_nib_super_user(request.user.username)
 
     conn = None
     errors = []

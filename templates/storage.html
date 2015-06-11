@@ -144,7 +144,8 @@
                 <hr>
                 {% ifnotequal state 0 %}
                     <a href="#AddImage" class="btn btn-success" data-toggle="modal">{% trans "Create Volume" %}</a>
-                    <a href="#AddImage" class="btn btn-success" data-toggle="modal">{% trans "Upload Volume" %}</a><br><br>
+                    <a href="#UploadVolume" class="btn btn-success" data-toggle="modal">{% trans "Upload Volume" %}</a>
+                    <br><br>
                 {% endifnotequal %}
 
                 {% if volumes %}
@@ -317,17 +318,17 @@
         </div>
         <!-- /.modal-dialog -->
     </div><!-- /.modal -->
-
-    <!-- Modal Upload -->
-    <div class="modal fade" id="IsoUpload" tabindex="-1" role="dialog" aria-labelledby="IsoUploadLabel"
+    <!-- Modal Upload Volume -->
+    <div class="modal fade" id="UploadVolume" tabindex="-1" role="dialog" aria-labelledby="UploadVolumeLabel"
          aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h4 class="modal-title">{% trans "Upload ISO Image" %}</h4>
+                    <h4 class="modal-title">{% trans "Upload existing VM image(valume)" %}</h4>
                 </div>
-                <form class="form-horizontal" enctype="multipart/form-data" method="post" role="form">{% csrf_token %}
+                <form class="form-horizontal" enctype="multipart/form-data" method="post"
+                      role="form">{% csrf_token %}
                     <div class="form-group">
                         <label class="col-sm-3 control-label">{% trans "Name" %}</label>
 
@@ -336,15 +337,50 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Close" %}</button>
-                        <button type="submit" class="btn btn-primary" name="iso_upload">{% trans "Upload" %}</button>
+                        <button type="button" class="btn btn-default"
+                                data-dismiss="modal">{% trans "Close" %}</button>
+                        <button type="submit" class="btn btn-primary"
+                                name="iso_upload">{% trans "Upload" %}</button>
                     </div>
                 </form>
             </div>
             <!-- /.modal-content -->
         </div>
         <!-- /.modal-dialog -->
-    </div><!-- /.modal -->
+    </div><!-- /.modal Upload Volume -->
+
+    {% if superuser %}
+        <!-- Modal Upload -->
+        <div class="modal fade" id="IsoUpload" tabindex="-1" role="dialog" aria-labelledby="IsoUploadLabel"
+             aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title">{% trans "Upload ISO Image" %}</h4>
+                    </div>
+                    <form class="form-horizontal" enctype="multipart/form-data" method="post"
+                          role="form">{% csrf_token %}
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">{% trans "Name" %}</label>
+
+                            <div class="col-sm-6">
+                                <input type="file" name="file" id="id_file">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default"
+                                    data-dismiss="modal">{% trans "Close" %}</button>
+                            <button type="submit" class="btn btn-primary"
+                                    name="iso_upload">{% trans "Upload" %}</button>
+                        </div>
+                    </form>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div><!-- /.modal -->
+    {% endif %}
     {% include 'sidebar_close.html' %}
 {% endblock %}
 {% block script %}

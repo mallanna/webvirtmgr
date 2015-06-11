@@ -48,7 +48,7 @@
                 <tr>
                     <td>{% trans "State" %}</td>
                     <td>
-
+                        {% if superuser %}
                         <form action="" method="post" role="form">{% csrf_token %}
                             {% ifequal state 0 %}
                                 <input type="submit" class="btn btn-xs btn-default" name="start" value="{% trans "Start" %}">
@@ -61,7 +61,13 @@
                                        onclick="return confirm('{% trans "Are you sure?" %}')">
                             {% endifequal %}
                         </form>
-
+                        {% else %}
+                            {% ifequal state 0 %}
+                                <span class="label label-danger">{% trans "Down" %}</span>
+                            {% else %}
+                                <span class="label label-success">{% trans "Running" %}</span>
+                            {% endifequal %}
+                        {% endif %}
                     </td>
                 </tr>
             </tbody>

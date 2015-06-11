@@ -22,6 +22,8 @@ urlpatterns = patterns('',
     url(r'^info/hostusage/(\d+)/$', 'hostdetail.views.hostusage', name='hostusage'),
     url(r'^info/insts_status/(\d+)/$', 'instance.views.insts_status', name='insts_status'),
     url(r'^info/instusage/(\d+)/([\w\-\.]+)/$', 'instance.views.instusage', name='instusage'),
+    url(r'^upgrade/$', 'nib.views.upgrade', name='upgrade'),
+    url(r'^reboot/$', 'nib.views.reboot', name='reboot'),
 )
 """
 
@@ -46,6 +48,8 @@ urlpatterns = patterns('',
     url(r'^info/hostusage/(\d+)/$', 'hostdetail.views.hostusage', name='hostusage'),
     url(r'^info/insts_status/(\d+)/$', 'instance.views.insts_status', name='insts_status'),
     url(r'^info/instusage/(\d+)/([\w\-\.]+)/$', 'instance.views.instusage', name='instusage'),
+    url(r'^upgrade/(\d+)/$', 'nib.views.upgrade', name='upgrade'),
+    url(r'^reboot/(\d+)/$', 'nib.views.reboot', name='reboot'),
 )
 
 urlpatterns += patterns('',
