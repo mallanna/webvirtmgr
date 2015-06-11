@@ -12,6 +12,8 @@ from vrtManager.network import network_size
 
 from libvirt import libvirtError
 
+from nib.util import is_nib_super_user
+
 
 def networks(request, host_id):
     """
@@ -19,6 +21,8 @@ def networks(request, host_id):
     """
     if not request.user.is_authenticated():
         return HttpResponseRedirect(reverse('login'))
+
+    superuser = is_nib_super_user(request.user.username)
 
     errors = []
     compute = Compute.objects.get(id=host_id)
@@ -62,6 +66,8 @@ def network(request, host_id, pool):
     """
     if not request.user.is_authenticated():
         return HttpResponseRedirect(reverse('login'))
+
+    superuser = is_nib_super_user(request.user.username)
 
     errors = []
     compute = Compute.objects.get(id=host_id)

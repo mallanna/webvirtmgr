@@ -15,38 +15,51 @@
         {% if device %}
             <table class="table table-hover table-nolines" role="main">
                 <tbody>
-                    <tr>
-                        <td>{% trans "Network name" %}</td>
-                        <td>
-                            [{% for net in networks %}
-                                {% ifequal net pool %}
-                                    <b>{{ net }}</b>
-                                {% else %}
-                                    <a href="{% url 'network' host_id net %}">{{ net }}</a>
-                                {% endifequal %}
-                            {% endfor %} ]
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>{% trans "Device" %}</td>
-                        <td>{{ device }}</td>
-                    </tr>
-                    <tr>
-                        <td>{% trans "State" %}</td>
-                        <td>
+                <tr>
+                    <td>{% trans "Network name" %}</td>
+                    <td>
+                        [{% for net in networks %}
+                        {% ifequal net pool %}
+                            <b>{{ net }}</b>
+                        {% else %}
+                            <a href="{% url 'network' host_id net %}">{{ net }}</a>
+                        {% endifequal %}
+                    {% endfor %} ]
+                    </td>
+                </tr>
+                <tr>
+                    <td>{% trans "Device" %}</td>
+                    <td>{{ device }}</td>
+                </tr>
+                <tr>
+                    <td>{% trans "State" %}</td>
+                    <td>
+                        {% if superuser %}
                             <form action="" method="post" role="form">{% csrf_token %}
                                 {% ifequal state 0 %}
                                     <input type="submit" class="btn btn-xs btn-default" name="start"
                                            value="{% trans "Start" %}">
                                     <input type="submit" class="btn btn-xs btn-default" name="delete"
-                                           value="{% trans "Delete" %}" onclick="return confirm('{% trans "Are you sure?" %}')">
+                                           value="{% trans "Delete" %}"
+                                           onclick="return confirm('{% trans "Are you sure?" %}')">
                                 {% else %}
-                                    <input type="submit" class="btn btn-xs btn-default" name="stop" value="{% trans "Stop" %}"
+                                    <input type="submit" class="btn btn-xs btn-default" name="stop"
+                                           value="{% trans "Stop" %}"
                                            onclick="return confirm('{% trans "Are you sure?" %}')">
                                 {% endifequal %}
                             </form>
-                        </td>
-                    </tr>
+                        {% else %}
+                            {% ifequal state 0 %}
+                                <span class="label label-danger">{% trans "Down" %}</span>
+
+                            {% else %}
+                                <span class="label label-success">{% trans "Running" %}</span>
+                            {% endifequal %}
+                        {% endif %}
+
+                    </td>
+                </tr>
+                {% if superuser %}
                     <tr>
                         <td>{% trans "Autostart" %}</td>
                         <td>
@@ -62,6 +75,7 @@
                             </form>
                         </td>
                     </tr>
+                {% endif %}
                 </tbody>
             </table>
 
@@ -69,47 +83,47 @@
             <hr>
             <table class="table table-hover table-nolines" role="main">
                 <tbody>
+                <tr>
+                    <td>{% trans "IPv4 Forwarding" %}</td>
+                    <td>
+                        {% ifequal ipv4_forward.0 'nat' %}
+                            {% trans "NAT" %}
+                        {% endifequal %}
+                        {% ifequal ipv4_forward.0 'route' %}
+                            {% trans "ROUTE" %}
+                        {% endifequal %}
+                        {% ifequal ipv4_forward.0 'bridge' %}
+                            {% trans "BRIDGE" %}
+                        {% endifequal %}
+                        {% if not ipv4_forward.0 %}
+                            {% trans "ISOLATE" %}
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>{% trans "Network" %}</td>
+                    <td>{{ ipv4_network }}</td>
+                </tr>
+                <tr>
+                    <td>{% trans "DHCP" %}</td>
+                    <td>
+                        {% if ipv4_dhcp_range_start and ipv4_dhcp_range_end %}
+                            <span class="label label-success">{% trans "ON" %}</span>
+                        {% else %}
+                            <span class="label label-danger">{% trans "OFF" %}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% if ipv4_dhcp_range_start and ipv4_dhcp_range_end %}
                     <tr>
-                        <td>{% trans "IPv4 Forwarding" %}</td>
-                        <td>
-                            {% ifequal ipv4_forward.0 'nat' %}
-                                {% trans "NAT" %}
-                            {% endifequal %}
-                            {% ifequal ipv4_forward.0 'route' %}
-                                {% trans "ROUTE" %}
-                            {% endifequal %}
-                            {% ifequal ipv4_forward.0 'bridge' %}
-                                {% trans "BRIDGE" %}
-                            {% endifequal %}
-                            {% if not ipv4_forward.0 %}
-                                {% trans "ISOLATE" %}
-                            {% endif %}
-                        </td>
+                        <td>{% trans "Start" %}</td>
+                        <td>{{ ipv4_dhcp_range_start }}</td>
                     </tr>
                     <tr>
-                        <td>{% trans "Network" %}</td>
-                        <td>{{ ipv4_network }}</td>
+                        <td>{% trans "End" %}</td>
+                        <td>{{ ipv4_dhcp_range_end }}</td>
                     </tr>
-                    <tr>
-                        <td>{% trans "DHCP" %}</td>
-                        <td>
-                            {% if ipv4_dhcp_range_start and ipv4_dhcp_range_end %}
-                                <span class="label label-success">{% trans "ON" %}</span>
-                            {% else %}
-                                <span class="label label-danger">{% trans "OFF" %}</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% if ipv4_dhcp_range_start and ipv4_dhcp_range_end %}
-                        <tr>
-                            <td>{% trans "Start" %}</td>
-                            <td>{{ ipv4_dhcp_range_start }}</td>
-                        </tr>
-                        <tr>
-                            <td>{% trans "End" %}</td>
-                            <td>{{ ipv4_dhcp_range_end }}</td>
-                        </tr>
-                    {% endif %}
+                {% endif %}
                 </tbody>
             </table>
 
