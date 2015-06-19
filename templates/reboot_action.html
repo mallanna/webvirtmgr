@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Reboot in Progress" %}{% endblock %}
+{% block content %}
+    <div class="main col-xs-12 col-sm-9">
+            <div class="well">
+                <h4>{% trans "System {{ req_type }} in action" %}</h4>
+            </div>
+    </div>
+{% endblock %}

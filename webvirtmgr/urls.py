@@ -49,6 +49,7 @@ urlpatterns = patterns('',
     url(r'^info/insts_status/(\d+)/$', 'instance.views.insts_status', name='insts_status'),
     url(r'^info/instusage/(\d+)/([\w\-\.]+)/$', 'instance.views.instusage', name='instusage'),
     url(r'^upgrade/(\d+)/$', 'nib.views.upgrade', name='upgrade'),
+    url(r'^info/upgrade_status/(\d+)/$', 'nib.views.upgrade_status', name='upgrade_status'),
     url(r'^reboot/(\d+)/$', 'nib.views.reboot', name='reboot'),
 )
 

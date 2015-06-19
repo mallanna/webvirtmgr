@@ -216,5 +216,3 @@ INSTALLED_APPS = (
     'nib',
 )
 
-NIB_SUPER_USER = 'mallanna'
-NIB_MAX_VMS = 0

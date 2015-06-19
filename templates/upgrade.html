@@ -13,6 +13,142 @@
                 </div>
             {% endfor %}
         {% endif %}
+
+        <div class="row" role="main">
+            <table class="table" style="width:500px;">
+                <thead>
+                <tr>
+                <th>
+                    {% if not activation %}
+
+                            <h4 class="modal-title">{% trans "Upgrading System " %} <span
+                                    class="label label-primary">{{ image_name }}</span></h4>
+
+                    {% else %}
+                        <div class="well">
+                            <h4>{% trans "System upgraded with " %} <span
+                                    class="label label-primary">{{ image_name }}</span></h4>
+                        </div>
+                    {% endif %}
+                </th>
+                </tr>
+                </thead>
+                <tbody>
+                {% if not activation %}
+                    <tr style="height: 100px">
+                        <td>
+                            <canvas id="statusCanvas" width="500" height="100" style="margin: 0px; padding: 0px;">
+                                Your browser does not support the HTML5 canvas tag.
+                            </canvas>
+                        </td>
+                    </tr>
+                {% endif %}
+                <tr>
+                    <td>
+                        <div id="upgrade_running" style="display:none">
+                            <form action="" method="post" style="height:10px" role="form">{% csrf_token %}
+                                <input type="hidden" name="img_name" value="{{ image_name }}">
+                                <input type="submit" class="btn btn-danger pull-right" name="upgrade_cancel"
+                                       value="{% trans "Cancel" %}"
+                                       onclick="return confirm('{% trans "Do you want cancel system upgrade?" %}')">
+                            </form>
+                        </div>
+                        <div id="upgrade_failed" style="display:none">
+                            <a href="{% url 'upgrade' host_id %}"
+                               class="btn btn-danger pull-right">{% trans "Close" %}</a>
+                        </div>
+                        <div id="upgrade_completed"
+                             style="display:none; margin-left: auto;margin-right: auto;width: 500px;">
+                            <div style="margin-left: auto;margin-right: auto;width: 150px;">
+                                <form action="{% url 'reboot' host_id %}" method="post" role="form">{% csrf_token %}
+                                    <input type="hidden" name="activation" value="true">
+                                    <input type="submit" class="btn btn-success pull-left" name="reboot"
+                                           value="{% trans "Activate" %}">
+                                </form>
+                            </div>
+                            <div style="margin-left: auto;margin-right: auto;width: 150px;">
+                                <form action="{% url 'upgrade' host_id %}" method="post" role="form">{% csrf_token %}
+                                    <input type="hidden" name="activation_cancel" value="activation_cancel">
+                                    <input type="submit" class="btn btn-success pull-right" name="activation_cancel"
+                                           value="{% trans "Cancel" %}">
+                                </form>
+                            </div>
+
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+        </div>
     </div>
-     {% include 'sidebar_close.html' %}
+    {% include 'sidebar_close.html' %}
+{% endblock %}
+{% block script %}
+    <script>
+        {% if not activation %}
+            function ProgressBar() {
+                var c = document.getElementById("statusCanvas");
+                var ctx = c.getContext("2d");
+                var bar_x = c.width / 20;
+                var bar_y = c.height / 2;
+                var bar_w = c.width - (2 * bar_x);
+                var bar_h = c.height / 10;
+                var text_x = bar_x;
+                var text_y = bar_y / 3;
+                var text_w = bar_w;
+                var text_h = 25;
+                document.cookie = 'query=start'
+                function drawPBar() {
+                    ctx.beginPath();
+                    ctx.lineWidth = 2;
+                    ctx.strokeStyle = '#428bca';
+                    ctx.strokeRect(bar_x, bar_y, bar_w, bar_h);
+                    ctx.strokeStyle = 'white';
+                    ctx.strokeRect(text_x, text_y, text_w, text_h);
+                }
+
+                this.drawPBarText = function (message, status) {
+                    if (status === 'running' || status === 'completed') {
+                        ctx.fillStyle = 'black';
+                    } else {
+                        ctx.fillStyle = 'red';
+                    }
+                    ctx.clearRect(text_x, text_y, text_w, text_h);
+                    ctx.font = '14pt Calibri';
+                    ctx.textAlign = 'left';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(message, text_x, text_y + 10);
+                    ctx.stroke();
+                };
+                this.drawPBarProgress = function (progress) {
+                    if (progress > 0) {
+                        var prg_fill = bar_w * ( progress / 100 );
+                        ctx.fillStyle = '#428bca';
+                        ctx.fillRect(bar_x, bar_y, prg_fill, bar_h);
+                        ctx.stroke();
+                    }
+                };
+                drawPBar();
+            }
+            var pbar = new ProgressBar();
+            var intervalId;
+            function progressBarStatus() {
+                $.getJSON('{% url 'upgrade_status' host_id %}', function (data) {
+                    pbar.drawPBarText(data['message'], data['status']);
+                    pbar.drawPBarProgress(data['progress']);
+                    $('#upgrade_' + data['status']).show();
+                    if (data['status'] != 'running') {
+                        window.clearInterval(intervalId)
+                    }
+                });
+            }
+
+            $(function () {
+                intervalId = window.setInterval('progressBarStatus()', 1000)
+            });
+        {% else %}
+            $('#upgrade_completed').show();
+        {% endif %}
+    </script>
 {% endblock %}

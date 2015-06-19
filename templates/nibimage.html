@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load staticfiles %}
+{% block title %}{% trans "Storage Pool" %}{% endblock %}
+{% block style %}
+    <link href="{% static "css/table-sort.css" %}" rel="stylesheet">
+{% endblock %}
+{% block content %}
+    {% include 'sidebar.html' %}
+    <div class="main col-xs-12 col-sm-9">
+        {% if errors %}
+            {% for error in errors %}
+                <div class="alert alert-danger">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                    {{ error }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        {% if form.name.errors %}
+            <div class="alert alert-danger">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                {% for error in form.name.errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+        {% endif %}
+        <h3>{% trans "NIB Platform Images" %}</h3>
+        <hr>
+        <a href="#UploadImage" class="btn btn-success" data-toggle="modal">{% trans "Upload Image" %}</a>
+        <br><br>
+        {% if images %}
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered" id="sortTable">
+                    <thead>
+                    <tr>
+                        <th style="width:35px;">#</th>
+                        <th>{% trans "Name" %}</th>
+                        <th style="width:80px;">{% trans "Size" %}</th>
+                        <th colspan="2">{% trans "Action" %}</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for image in images %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ image.name }}</td>
+                            <td>{{ image.size |filesizeformat }}</td>
+                            <td style="width:30px;">
+                                <form action="" method="post" style="height:10px" role="form">{% csrf_token %}
+                                    <input type="hidden" name="img_name" value="{{ image.name }}">
+                                    <input type="submit" class="btn btn-sm btn-primary" name="upgrade_image"
+                                           value="{% trans "Upgrade" %}"
+                                           onclick="return confirm('{% trans "Do you want to upgrade the system?" %}')">
+                                </form>
+                            </td>
+                            <td style="width:30px;">
+                                <form action="" method="post" style="height:10px" role="form">{% csrf_token %}
+                                    <input type="hidden" name="img_name" value="{{ image.name }}">
+                                    <input type="submit" class="btn btn-sm btn-danger" name="del_image"
+                                           value="{% trans "Delete" %}"
+                                           onclick="return confirm('{% trans "Are you sure?" %}')">
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="well pagination-centered">
+                <h4>{% trans "System does not contains images to upgrade" %}</h4>
+            </div>
+        {% endif %}
+    </div>
+    <!-- Modal Upload Volume -->
+    <div class="modal fade" id="UploadImage" tabindex="-1" role="dialog" aria-labelledby="UploadImageLabel"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">{% trans "Upload NIB Platform image" %}</h4>
+                </div>
+                <form class="form-horizontal" enctype="multipart/form-data" method="post"
+                      role="form">{% csrf_token %}
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">{% trans "Name" %}</label>
+
+                        <div class="col-sm-6">
+                            <input type="file" name="file" id="id_file">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default"
+                                data-dismiss="modal">{% trans "Close" %}</button>
+                        <button type="submit" class="btn btn-primary"
+                                name="image_upload">{% trans "Upload" %}</button>
+                    </div>
+                </form>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div><!-- /.modal Upload Volume -->
+    {% include 'sidebar_close.html' %}
+{% endblock %}
+{% block script %}
+    <script src="{% static "js/jquery.tablesorter.js" %}"></script>
+    <script>
+        $(function () {
+            $("#sortTable").tablesorter({
+                ignoreCase: true,
+                sortList: [[0, 0]],
+                headers: {4: {sorter: false}},
+                textSorter: {1: $.tablesorter.sortText}
+            });
+        });
+    </script>
+{% endblock %}

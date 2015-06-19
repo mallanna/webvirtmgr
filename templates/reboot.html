@@ -12,25 +12,31 @@
                 </div>
             {% endfor %}
         {% endif %}
-
-        <div class="well">
-            <h4>{% trans "NIB platform Shutdown/Reboot" %}</h4>
-        </div>
-        <div class="row">
-            <div class="col-xs-12">
-                <form action="" method="post" role="form">{% csrf_token %}
-                    <input type="hidden" name="host_id" value="{{ host.id }}">
-                    <div class="" style="margin-left: auto;margin-right: auto;width: 230px;">
-                    <button type="submit" class="btn  btn-danger" name="reboot"
-                            onclick="return confirm('{% trans "Are you sure?" %}')"> {% trans "Reboot" %}
-                    </button>
-                    <button type="submit" class="btn  btn-danger" name="shutdown"
-                            onclick="return confirm('{% trans "Are you sure?" %}')"> {% trans "Shutdown" %}
-                    </button>
+        {% if disable_reboot %}
+            <div class="well alert-danger">
+                <h4>{% trans "System upgrade is ongoing, reboot disabled" %} </h4>
+            </div>
+        {% else %}
+            <div class="well">
+                <h4>{% trans "NIB platform Shutdown/Reboot" %}</h4>
+            </div>
+            <div class="row">
+                <div class="col-xs-12">
+                    <form action="" method="post" role="form">{% csrf_token %}
+                        <div class="" style="margin-left: auto;margin-right: auto;width: 230px;">
+                            <button type="submit" class="btn  btn-danger" name="reboot"
+                                    onclick="return confirm('{% trans "Do you want to reboot the system?" %}')">
+                                    {% trans "Reboot" %}
+                            </button>
+                            <button type="submit" class="btn  btn-danger" name="shutdown"
+                                    onclick="return confirm('{% trans "Do you want to shutdown the system?" %}')">
+                                    {% trans "Shutdown" %}
+                            </button>
                         </div>
-                </form>
+                    </form>
                 </div>
-        </div>
+            </div>
+        {% endif %}
     </div>
     {% include 'sidebar_close.html' %}
 {% endblock %}
