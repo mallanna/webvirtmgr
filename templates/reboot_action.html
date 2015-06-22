@@ -1,10 +1,127 @@
-{% extends "base.html" %}
-{% load i18n %}
-{% block title %}{% trans "Reboot in Progress" %}{% endblock %}
-{% block content %}
-    <div class="main col-xs-12 col-sm-9">
-            <div class="well">
-                <h4>{% trans "System {{ req_type }} in action" %}</h4>
-            </div>
+{% load i18n %}{% load staticfiles %}<!DOCTYPE html>
+<html manifest="nib_reset.appcache">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="{% static "img/favicon.ico" %}">
+    <link rel="stylesheet" href="{% static "css/bootstrap.min.css" %}">
+    <link href="{% static "css/webvirtmgr.css" %}" rel="stylesheet">
+    {% block style %}{% endblock %}
+</head>
+
+<body>
+<nav class="navbar navbar-inverse navbar-static-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <a class="navbar-brand">NIB Platform Manager</a>
+        </div>
     </div>
-{% endblock %}
+</nav>
+<div class="container">
+    {% block content %}
+        {% if errors %}
+            {% for error in errors %}
+                <div class="alert alert-danger">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                    {{ error }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        <div class="main">
+                <canvas id="resetCanvas" width="700" height="200" style="margin: 0px; padding: 0px;">
+                    Your browser does not support the HTML5 canvas tag.
+                </canvas>
+        </div>
+    {% endblock %}
+</div>
+<script src="{% static "js/jquery-1.10.2.js" %}"></script>
+<script src="{% static "js/bootstrap.min.js" %}"></script>
+<script>
+    function ResetProgress() {
+        var c = document.getElementById("resetCanvas");
+        var ctx = c.getContext("2d");
+
+        var text_x = c.width / 5;
+        var text_y = c.height / 5;
+        var text_w = c.width;
+        var text_h = 50;
+        var c_x = text_x + 10;
+        var c_y = text_y + text_h + 30;
+        function drawPBar() {
+            ctx.beginPath();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = 'white';
+            ctx.strokeRect(text_x, text_y, text_w, text_h);
+        }
+
+        this.drawPBarText = function (message) {
+            ctx.clearRect(text_x, text_y, text_w, text_h);
+            ctx.font = '22pt Calibri';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = 'black';
+            ctx.fillText(message, text_x, text_y + 10);
+            ctx.stroke();
+        };
+        this.drawResetProgress = function (step) {
+            ctx.beginPath();
+            c_x = c_x + step;
+            ctx.arc(c_x, c_y  , 4 , 0, 2 * Math.PI, false);
+            ctx.fillStyle = 'back';
+            ctx.fill();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = 'black';
+            ctx.stroke();
+        };
+        drawPBar();
+    }
+    var pbar = new ResetProgress();
+    var req  = "{{ req_type }}";
+    var flag = 0;
+    pbar.drawPBarText("system is going for " + req);
+    pbar.drawResetProgress(0);
+    var loc = window.location;
+    var base_url = loc.protocol + '//' + loc.host;
+    var intervalId = window.setInterval(function() {
+        $.ajax({
+            url: base_url,
+            type: "HEAD",
+            timeout: 5000,
+            statusCode: {
+                200: function () {
+                    if (flag) {
+                        if(flag > 1) {
+                            window.location = base_url + '/' +'login';
+                        }
+                        pbar.drawPBarText("system is up");
+                        pbar.drawResetProgress(25);
+                        flag++;
+                    } else {
+                        pbar.drawPBarText(req + " in progress");
+                        pbar.drawResetProgress(25);
+                    }
+                },
+                502: function () {
+                    pbar.drawPBarText("waiting for system to come up");
+                    pbar.drawResetProgress(25);
+                    flag = 1;
+                },
+                0: function () {
+                    if (req === 'reboot') {
+                        pbar.drawPBarText("waiting for system to come up");
+                        pbar.drawResetProgress(25);
+                        flag = 1;
+                    } else {
+                        pbar.drawPBarText('shutdown completed, close the window');
+                        //window.open('', '_self', '');
+                        //window.close();
+                        window.clearInterval(intervalId);
+                    }
+                }
+            }
+        })},10 * 1000 );
+
+</script>
+</body>
+</html>
+

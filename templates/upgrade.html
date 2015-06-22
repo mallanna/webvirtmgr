@@ -98,7 +98,6 @@
                 var text_y = bar_y / 3;
                 var text_w = bar_w;
                 var text_h = 25;
-                document.cookie = 'query=start'
                 function drawPBar() {
                     ctx.beginPath();
                     ctx.lineWidth = 2;
@@ -109,12 +108,12 @@
                 }
 
                 this.drawPBarText = function (message, status) {
+                    ctx.clearRect(text_x, text_y, text_w, text_h);
                     if (status === 'running' || status === 'completed') {
                         ctx.fillStyle = 'black';
                     } else {
                         ctx.fillStyle = 'red';
                     }
-                    ctx.clearRect(text_x, text_y, text_w, text_h);
                     ctx.font = '14pt Calibri';
                     ctx.textAlign = 'left';
                     ctx.textBaseline = 'middle';
@@ -138,8 +137,21 @@
                     pbar.drawPBarText(data['message'], data['status']);
                     pbar.drawPBarProgress(data['progress']);
                     $('#upgrade_' + data['status']).show();
-                    if (data['status'] != 'running') {
-                        window.clearInterval(intervalId)
+                    if (data['status'] == 'running') {
+                        $('#upgrade_failed').hide();
+                        $('#upgrade_completed').hide();
+                        $('#upgrade_running').show();
+                    } else {
+                        window.clearInterval(intervalId);
+                        $('#upgrade_running').hide();
+                        if (data['status'] == 'completed') {
+                            $('#upgrade_failed').hide();
+                            $('#upgrade_completed').show();
+                        }
+                        if (data['status'] == 'failed') {
+                            $('#upgrade_completed').hide();
+                            $('#upgrade_failed').hide();
+                        }
                     }
                 });
             }

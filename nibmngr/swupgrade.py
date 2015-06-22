@@ -1,5 +1,6 @@
 import threading
 import time
+import shutil
 from util import *
 
 
@@ -26,7 +27,7 @@ class NibSwUpdater(threading.Thread):
 
     def run(self):
         upgrade_steps = {
-            'step 1': {'func': self.prepare_upgrade, 'msg': 'preparing software upgrade', 'prg': 5},
+            'step 1': {'func': self.prepare_upgrade, 'msg': 'preparing software upgrade', 'prg': 10},
             'step 2': {'func': self.format_parts, 'msg': 'formatting partitions', 'prg': 15},
             'step 3': {'func': self.extract_image, 'msg': 'extracting image to hard disk', 'prg': 35},
             'step 4': {'func': self.configure_system, 'msg': 'configuring system', 'prg': 55},
@@ -44,6 +45,7 @@ class NibSwUpdater(threading.Thread):
                 if ret:
                     msg = '{0}(failed)'.format(msg)
                     log_err(msg)
+                    self.cleanup()
                     self.progress_msg = {'status': 'failed', 'message': msg, 'progress': -1}
                     break
             else:
@@ -73,14 +75,16 @@ class NibSwUpdater(threading.Thread):
         set2_root = int((self.parts['set2']['root'])[-1:])
         set2_boot = int((self.parts['set2']['boot'])[-1:])
         if (root_minor & set1_root) & (boot_minor & set1_boot):
-            self.passive = 'set1'
-        elif (root_minor & set2_root) & (boot_minor & set2_boot):
             self.passive = 'set2'
+        elif (root_minor & set2_root) & (boot_minor & set2_boot):
+            self.passive = 'set1'
         else:
             log_err('invalid partitions combinations')
             return -1
         if not os.path.isfile(self.sw_image):
             log_err('software image not found {0}'.format(self.sw_image))
+            return -1
+
         return 0
 
     def format_parts(self):
@@ -100,6 +104,8 @@ class NibSwUpdater(threading.Thread):
         if ret:
             return ret
 
+    def mount_partitions(self):
+
         # mount the partition boot
         mnt_cmd = "mount -t ext4 {0} {1}"
         if not os.path.exists(self.parts['root_mnt']):
@@ -111,7 +117,7 @@ class NibSwUpdater(threading.Thread):
         self.mnt_points.append(self.parts['root_mnt'])
 
         if not os.path.exists(self.parts['boot_mnt']):
-            os.mkdir(self.parts['root_mnt'])
+            os.mkdir(self.parts['boot_mnt'])
         ret = exec_cmd(mnt_cmd.format(self.parts[self.passive]['boot'], self.parts['boot_mnt']).split())
         if ret:
             return ret
@@ -119,7 +125,7 @@ class NibSwUpdater(threading.Thread):
 
         if not os.path.exists(self.parts['conf_mnt']):
             os.mkdir(self.parts['conf_mnt'])
-        ret = exec_cmd(mnt_cmd.format(self.parts[self.passive]['conf'], self.parts['conf_mnt']).split())
+        ret = exec_cmd(mnt_cmd.format(self.parts[self.passive]['config'], self.parts['conf_mnt']).split())
         if ret:
             return ret
         self.mnt_points.append(self.parts['conf_mnt'])
@@ -127,18 +133,24 @@ class NibSwUpdater(threading.Thread):
         return 0
 
     def extract_image(self):
+        ret = self.mount_partitions()
+        if ret:
+            return ret
         return exec_cmd("tar xfz {0} -C  {1}".format(self.sw_image, self.parts['root_mnt']).split())
 
     def configure_system(self):
         fstab_string = (
-            self.parts[self.passive]['root'] + "/ ext4    errors=remount-ro 0 1\n" +
-            self.parts[self.passive]['boot'] + "/boot ext4 defaults 0 2\n" +
-            self.parts[self.passive]['conf'] + "/config ext4 defaults 0 2\n" +
-            "/dev/sda9 /mnt/storage ext4 defaults 0 2\n" +
-            "/dev/sda3 none swap sw 0 0\n")
+            self.parts[self.passive]['root'] + "\t/\text4\terrors=remount-ro 0 1\n" +
+            self.parts[self.passive]['boot'] + "\t/boot\text4\tdefaults 0 2\n" +
+            self.parts[self.passive]['config'] + "\t/config\text4\tdefaults 0 2\n" +
+            "/dev/sda9\t/mnt/storage\text4\tdefaults 0 2\n" +
+            "/dev/sda3\tnone\tswap\tsw 0 0\n")
         fstab_file = open("{0}/etc/fstab".format(self.parts['root_mnt']), "w")
         fstab_file.write(fstab_string)
         fstab_file.close()
+        return 0
+
+    def prepare_chroot(self):
 
         ret = exec_cmd("mount -o bind /sys {0}".format(self.parts['sys_mnt']).split())
         if ret:
@@ -158,6 +170,12 @@ class NibSwUpdater(threading.Thread):
         return ret
 
     def update_grub(self):
+        ret = self.prepare_chroot()
+        if ret:
+            return ret
+
+        # return 0
+
         ret = exec_cmd("chroot {0} grub-install /dev/sda".format(self.parts['root_mnt']).split())
         if ret:
             return ret
@@ -173,9 +191,11 @@ class NibSwUpdater(threading.Thread):
                     exec_cmd('umount {0}'.format(mountpoint).split()) != 0):
                 exec_cmd('lsof {0}'.format(mountpoint).split())
                 time.sleep(1)
-        for mtp in reversed(self.mnt_points):
-            wait_unmount(mtp)
-        os.rmdir(self.parts['root_mnt'])
+        # for mtp in reversed(self.mnt_points):
+        # wait_unmount(mtp)
+        exec_cmd('umount -lf {0}'.format(self.parts['root_mnt']).split())
+        self.mnt_points = []
+        shutil.rmtree(self.parts['root_mnt'],ignore_errors=True)
         return 0
 
     def get_status(self):

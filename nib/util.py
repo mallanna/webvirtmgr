@@ -57,6 +57,38 @@ def stop_swupgrade():
         print 'error while stopping software upgrade service'
 
 
+def create_sw_upgrade_state(image_name):
+    if os.path.exists(NIB_SW_UPGRADE_STATE):
+        os.remove(NIB_SW_UPGRADE_STATE)
+    sw_state = {'image': image_name, 'state': 1}
+    with open(NIB_SW_UPGRADE_STATE, "w") as state_file:
+        state_file.write(json.dumps(sw_state))
+        state_file.close()
+
+def update_sw_upgrade_state(state):
+    if not state:
+        if os.path.exists(NIB_SW_UPGRADE_STATE):
+            os.remove(NIB_SW_UPGRADE_STATE)
+    else:
+        with open(NIB_SW_UPGRADE_STATE, "r+") as state_file:
+            data = json.load(state_file)
+            tmp = data['state']
+            data['state'] = state
+            state_file.seek(0)
+            state_file.write(json.dumps(data))
+            state_file.truncate()
+            state_file.close()
+
+
+def get_sw_upgrade_state():
+    state = {}
+    if os.path.exists(NIB_SW_UPGRADE_STATE):
+        state_file = open(NIB_SW_UPGRADE_STATE, "r+")
+        state = json.load(state_file)
+        state_file.close()
+    return state
+
+
 
 
 
