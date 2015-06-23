@@ -27,16 +27,17 @@ def log_warn(message):
     syslog(LOG_WARNING, message)
 
 def exec_cmd(command):
-    print command
     try:
         ret = check_call(command)
     except CalledProcessError as e:
         log_err(str(e) + '  error:' + os.strerror(e.returncode))
         return e.returncode
+    except OSError as err:
+        log_err(err.strerror)
+        print err.strerror
+        return err.errno
     return ret
 
 def reset_nib(opt):
     command = "/sbin/shutdown " + opt + " -t 1"
     return exec_cmd(command.split())
-
-

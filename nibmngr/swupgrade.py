@@ -136,7 +136,7 @@ class NibSwUpdater(threading.Thread):
         ret = self.mount_partitions()
         if ret:
             return ret
-        return exec_cmd("tar xfJ {0} -C  {1}".format(self.sw_image, self.parts['root_mnt']).split())
+        return exec_cmd("tar xfz {0} -C  {1}".format(self.sw_image, self.parts['root_mnt']).split())
 
     def configure_system(self):
         ret = 0
@@ -146,13 +146,17 @@ class NibSwUpdater(threading.Thread):
             self.parts[self.passive]['config'] + "\t/config\text4\tdefaults 0 2\n" +
             "/dev/sda9\t/mnt/storage\text4\tdefaults 0 2\n" +
             "/dev/sda3\tnone\tswap\tsw 0 0\n")
+        if not os.path.exists("{0}/etc/fstab".format(self.parts['root_mnt'])):
+            log_err("fstab file not found")
+            return 1
         fstab_file = open("{0}/etc/fstab".format(self.parts['root_mnt']), "w")
         fstab_file.write(fstab_string)
         fstab_file.close()
+        
         configurator = "{0}/root/installer/nib_configurator".format(self.parts['root_mnt'])
         if os.path.exists(configurator):
             log_info("Executing configurator")
-            ret = exec_cmd("ROOT_PATH={0} {1}".format(self.parts['root_mnt'], configurator).split())
+            ret = exec_cmd("{0} {1}".format(configurator, self.parts['root_mnt']).split())
         else:
             log_info("configurator not found")
         return ret
