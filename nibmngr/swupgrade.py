@@ -136,9 +136,10 @@ class NibSwUpdater(threading.Thread):
         ret = self.mount_partitions()
         if ret:
             return ret
-        return exec_cmd("tar xfz {0} -C  {1}".format(self.sw_image, self.parts['root_mnt']).split())
+        return exec_cmd("tar xfJ {0} -C  {1}".format(self.sw_image, self.parts['root_mnt']).split())
 
     def configure_system(self):
+        ret = 0
         fstab_string = (
             self.parts[self.passive]['root'] + "\t/\text4\terrors=remount-ro 0 1\n" +
             self.parts[self.passive]['boot'] + "\t/boot\text4\tdefaults 0 2\n" +
@@ -148,7 +149,13 @@ class NibSwUpdater(threading.Thread):
         fstab_file = open("{0}/etc/fstab".format(self.parts['root_mnt']), "w")
         fstab_file.write(fstab_string)
         fstab_file.close()
-        return 0
+        configurator = "{0}/root/installer/nib_configurator".format(self.parts['root_mnt'])
+        if os.path.exists(configurator):
+            log_info("Executing configurator")
+            ret = exec_cmd("ROOT_PATH={0} {1}".format(self.parts['root_mnt'], configurator).split())
+        else:
+            log_info("configurator not found")
+        return ret
 
     def prepare_chroot(self):
 

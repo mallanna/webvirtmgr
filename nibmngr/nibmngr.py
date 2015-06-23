@@ -16,6 +16,13 @@ updater = None
 
 class NibServiceMngr:
     def __init__(self, is_daemon):
+
+        if not os.path.exists(NIB_RUN_DIR):
+            try:
+                os.mkdir(NIB_RUN_DIR)
+            except OSError:
+                raise
+        os.chown(NIB_RUN_DIR, getpwnam(NIB_SOCKET_USER)[2], getpwnam(NIB_SOCKET_USER)[2])
         self.sock_path = NIB_UNIX_SERVER_SOCKET
         try:
             os.unlink(self.sock_path)
